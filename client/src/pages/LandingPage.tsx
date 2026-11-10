@@ -14,9 +14,14 @@ export function LandingPage() {
     <PhoneFrame>
       <div className="flex items-center justify-between px-5 py-4">
         <Logo />
-        <Link to="/login" className="text-sm font-medium text-theo">
-          Log in
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to="/" className="text-xs font-medium text-theo-muted">
+            Back
+          </Link>
+          <Link to="/login" className="text-sm font-medium text-theo">
+            Log in
+          </Link>
+        </div>
       </div>
       <div className="flex flex-1 flex-col px-6 pb-2">
         <p className="mt-4 max-w-[16ch] text-[34px] font-bold leading-[1.1] text-theo-ink">

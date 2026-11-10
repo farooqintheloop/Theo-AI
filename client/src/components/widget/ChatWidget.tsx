@@ -1,5 +1,5 @@
 import { Send } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 
 type ChatMessage = {
@@ -7,16 +7,29 @@ type ChatMessage = {
   text: string
 }
 
-const starter: ChatMessage[] = [
-  {
-    role: 'assistant',
-    text: 'Hi, I am Sophia. Welcome to Grand Plaza. How can I help with your stay?',
-  },
-]
+type ChatWidgetProps = {
+  employeeName?: string
+  hotelName?: string
+  greeting?: string
+}
 
-export function ChatWidget() {
-  const [messages, setMessages] = useState<ChatMessage[]>(starter)
+export function ChatWidget({
+  employeeName = 'Sophia',
+  hotelName = 'Grand Plaza',
+  greeting,
+}: ChatWidgetProps) {
+  const opening =
+    greeting ?? `Hi, I am ${employeeName}. Welcome to ${hotelName}. How can I help with your stay?`
+
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', text: opening },
+  ])
   const [draft, setDraft] = useState('')
+
+  useEffect(() => {
+    setMessages([{ role: 'assistant', text: opening }])
+    setDraft('')
+  }, [opening])
 
   function send() {
     const text = draft.trim()
@@ -26,17 +39,17 @@ export function ChatWidget() {
       { role: 'customer', text },
       {
         role: 'assistant',
-        text: 'Thanks — I will take that enquiry and pass it to the team. The live AI reply will come from the API next.',
+        text: `Thanks — ${employeeName} will pass this enquiry to ${hotelName}. Live AI replies will come from the API next.`,
       },
     ])
     setDraft('')
   }
 
   return (
-    <div className="flex h-[520px] flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl">
+    <div className="flex h-[420px] flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl md:h-[480px]">
       <div className="bg-theo px-5 py-4 text-white">
-        <p className="text-sm font-semibold">THEO chat</p>
-        <p className="text-xs text-white/80">Website widget preview</p>
+        <p className="text-sm font-semibold">{employeeName}</p>
+        <p className="text-xs text-white/80">{hotelName} receptionist</p>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.map((message, index) => (
