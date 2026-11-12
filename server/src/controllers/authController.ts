@@ -66,10 +66,11 @@ function logDevToken(kind: 'verify' | 'reset', email: string, token: string) {
 }
 
 export async function register(req: Request, res: Response) {
-  const { email, password } = req.body as { email: string; password: string }
+  const email = String((req.body as { email: string }).email).toLowerCase().trim()
+  const { password } = req.body as { password: string }
   const existing = await User.findOne({ email })
   if (existing) {
-    throw new AppError(409, 'An account with this email already exists', 'EMAIL_TAKEN')
+    throw new AppError(409, 'An account with this email already exists. Please log in.', 'EMAIL_TAKEN')
   }
 
   const { token, hash } = createRandomToken()
@@ -83,18 +84,26 @@ export async function register(req: Request, res: Response) {
   })
 
   logDevToken('verify', email, token)
-  const { refreshToken } = issueSession(res, user)
-  user.refreshTokenHash = hashRefreshToken(refreshToken)
-  await user.save()
 
-  res.status(201).json({ user: publicUser(user) })
+  res.status(201).json({
+    message: 'Account created. You can log in now.',
+    user: publicUser(user),
+  })
 }
 
 export async function login(req: Request, res: Response) {
-  const { email, password } = req.body as { email: string; password: string }
+  const email = String((req.body as { email: string }).email).toLowerCase().trim()
+  const { password } = req.body as { password: string }
   const user = await User.findOne({ email })
-  if (!user || !(await verifyPassword(user.passwordHash, password))) {
-    throw new AppError(401, 'Invalid email or password', 'INVALID_CREDENTIALS')
+  if (!user) {
+    throw new AppError(
+      404,
+      'No account found with this email. Please register first.',
+      'USER_NOT_FOUND',
+    )
+  }
+  if (!(await verifyPassword(user.passwordHash, password))) {
+    throw new AppError(401, 'Incorrect password.', 'INVALID_PASSWORD')
   }
 
   const { refreshToken } = issueSession(res, user)

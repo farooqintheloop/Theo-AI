@@ -6,13 +6,16 @@ export async function connectDb() {
 
   try {
     await mongoose.connect(env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000,
+      dbName: env.MONGODB_DB_NAME,
+      serverSelectionTimeoutMS: 12000,
     })
-    console.log(`MongoDB connected (${mongoose.connection.name})`)
+    console.log(
+      `MongoDB connected (db=${mongoose.connection.name} host=${mongoose.connection.host})`,
+    )
   } catch (error) {
     console.error('MongoDB connection failed.')
     console.error(
-      'Use a local URI like mongodb://127.0.0.1:27017/theo or paste an Atlas mongodb+srv:// string into server/.env as MONGODB_URI. No extra website connector is required — Mongoose is the driver.',
+      'Set MONGODB_URI in server/.env to the Atlas string with the real database username and password (not <db_username> placeholders).',
     )
     throw error
   }
@@ -20,4 +23,19 @@ export async function connectDb() {
 
 export async function disconnectDb() {
   await mongoose.disconnect()
+}
+
+export function mongoStatus() {
+  const states: Record<number, string> = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  }
+  const readyState = mongoose.connection.readyState
+  return {
+    state: states[readyState] ?? 'unknown',
+    db: mongoose.connection.name || env.MONGODB_DB_NAME,
+    host: mongoose.connection.host || null,
+  }
 }

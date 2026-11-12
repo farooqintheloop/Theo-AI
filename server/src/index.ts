@@ -4,8 +4,8 @@ import { env } from './config/env.js'
 
 async function start() {
   await connectDb()
-  app.listen(env.PORT, () => {
-    console.log(`THEO API listening on http://localhost:${env.PORT}`)
+  app.listen(env.PORT, '0.0.0.0', () => {
+    console.log(`THEO API listening on port ${env.PORT}`)
   })
 }
 
