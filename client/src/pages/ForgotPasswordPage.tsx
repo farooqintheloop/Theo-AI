@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
-import { PhoneFrame } from '@/components/layout/PhoneFrame'
+import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { authApi } from '@/services/auth'
@@ -34,42 +34,32 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <PhoneFrame>
-      <form
-        className="flex flex-1 flex-col px-6 py-8"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <h1 className="text-3xl font-bold">Forgot password</h1>
-        <p className="mt-2 text-sm text-theo-muted">
-          {done
-            ? 'If that email exists, a reset token was created. Email sending is not enabled yet — check the API server log in development.'
-            : 'Enter the email on your THEO account.'}
-        </p>
+    <AuthLayout>
+      <h1 className="mt-5 text-2xl font-bold">Forgot password</h1>
+      <p className="mt-2 max-w-sm text-sm text-theo-muted">
+        {done
+          ? 'If that email exists, a reset was started. Email sending is not enabled yet.'
+          : 'Enter the business email on your THEO account.'}
+      </p>
+      <form className="mt-8 w-full space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         {!done ? (
-          <div className="mt-8">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="you@business.com"
-              error={form.formState.errors.email?.message}
-              {...form.register('email')}
-            />
-          </div>
+          <Input
+            placeholder="Business Email"
+            type="email"
+            error={form.formState.errors.email?.message}
+            {...form.register('email')}
+          />
         ) : null}
-        {serverError ? (
-          <p className="mt-3 text-sm text-red-500">{serverError}</p>
+        {serverError ? <p className="text-sm text-red-500">{serverError}</p> : null}
+        {!done ? (
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Send reset link
+          </Button>
         ) : null}
-        <div className="mt-auto space-y-3">
-          {!done ? (
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Sending…' : 'Send reset link'}
-            </Button>
-          ) : null}
-          <Link to="/login" className="block text-center text-sm text-theo">
-            Back to login
-          </Link>
-        </div>
+        <Link to="/login" className="block text-center text-sm font-medium text-theo">
+          Back to login
+        </Link>
       </form>
-    </PhoneFrame>
+    </AuthLayout>
   )
 }

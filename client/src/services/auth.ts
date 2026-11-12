@@ -10,6 +10,7 @@ export type AuthUserDto = {
 
 export type AuthResponse = {
   user: AuthUserDto
+  message?: string
 }
 
 export const authApi = {

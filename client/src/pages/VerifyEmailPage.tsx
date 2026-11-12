@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { PhoneFrame } from '@/components/layout/PhoneFrame'
+import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 import { authApi } from '@/services/auth'
@@ -36,34 +36,26 @@ export function VerifyEmailPage() {
   }, [token])
 
   return (
-    <PhoneFrame>
-      <div className="flex flex-1 flex-col px-6 py-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-theo">
-          Authentication
-        </p>
-        <h1 className="mt-2 text-3xl font-bold">
-          {status === 'ok' ? 'Email verified' : 'Check your inbox'}
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-theo-muted">
-          {status === 'ok'
-            ? 'Your email is verified. Continue to onboarding or log in.'
-            : status === 'error'
-              ? message
-              : 'We will send a verification link here once Resend is connected. For now you can continue onboarding, or open a link with ?token= from the API log.'}
-        </p>
-        <div className="mt-auto space-y-3">
-          {user && !user.onboardingComplete ? (
-            <Button onClick={() => navigate('/onboarding')}>Continue onboarding</Button>
-          ) : (
-            <Link to="/login">
-              <Button>Go to login</Button>
-            </Link>
-          )}
-          <Link to="/" className="block text-center text-sm text-theo">
-            Back to home
+    <AuthLayout>
+      <h1 className="mt-5 text-2xl font-bold">
+        {status === 'ok' ? 'Email verified' : 'Check your inbox'}
+      </h1>
+      <p className="mt-3 max-w-sm text-sm leading-6 text-theo-muted">
+        {status === 'ok'
+          ? 'Your email is verified. Continue to onboarding or log in.'
+          : status === 'error'
+            ? message
+            : 'Email sending is not connected yet. Continue onboarding, or open a link with ?token= from the API log.'}
+      </p>
+      <div className="mt-8 w-full space-y-3">
+        {user && !user.onboardingComplete ? (
+          <Button onClick={() => navigate('/onboarding')}>Continue onboarding</Button>
+        ) : (
+          <Link to="/login">
+            <Button>Go to login</Button>
           </Link>
-        </div>
+        )}
       </div>
-    </PhoneFrame>
+    </AuthLayout>
   )
 }

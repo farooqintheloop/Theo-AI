@@ -2,69 +2,80 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
+import { authApi, type AuthUserDto } from '@/services/auth'
 import type { AuthUser } from '@/types/auth'
 
 type AuthContextValue = {
   user: AuthUser | null
-  login: (email: string) => void
-  register: (email: string) => void
+  loading: boolean
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string) => Promise<string>
   completeOnboarding: () => void
-  logout: () => void
+  logout: () => Promise<void>
 }
 
-const STORAGE_KEY = 'theo-auth'
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function readStoredUser(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as AuthUser) : null
-  } catch {
-    return null
+function toAuthUser(dto: AuthUserDto): AuthUser {
+  return {
+    id: dto.id,
+    email: dto.email,
+    onboardingComplete: true,
   }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(readStoredUser)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const persist = useCallback((next: AuthUser | null) => {
-    setUser(next)
-    if (next) localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    else localStorage.removeItem(STORAGE_KEY)
+  useEffect(() => {
+    let cancelled = false
+    authApi
+      .me()
+      .then((response) => {
+        if (!cancelled) setUser(toAuthUser(response.data.user))
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const login = useCallback(
-    (email: string) => {
-      persist({ email, onboardingComplete: true })
-    },
-    [persist],
-  )
+  const login = useCallback(async (email: string, password: string) => {
+    const response = await authApi.login({ email, password })
+    setUser(toAuthUser(response.data.user))
+  }, [])
 
-  const register = useCallback(
-    (email: string) => {
-      persist({ email, onboardingComplete: false })
-    },
-    [persist],
-  )
+  const register = useCallback(async (email: string, password: string) => {
+    const response = await authApi.register({ email, password })
+    return response.data.message ?? 'Account created. You can log in now.'
+  }, [])
 
   const completeOnboarding = useCallback(() => {
-    setUser((current) => {
-      if (!current) return current
-      const next = { ...current, onboardingComplete: true }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      return next
-    })
+    setUser((current) => (current ? { ...current, onboardingComplete: true } : current))
   }, [])
 
-  const logout = useCallback(() => persist(null), [persist])
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout()
+    } finally {
+      setUser(null)
+    }
+  }, [])
 
   const value = useMemo(
-    () => ({ user, login, register, completeOnboarding, logout }),
-    [user, login, register, completeOnboarding, logout],
+    () => ({ user, loading, login, register, completeOnboarding, logout }),
+    [user, loading, login, register, completeOnboarding, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

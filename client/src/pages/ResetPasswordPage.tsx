@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
-import { PhoneFrame } from '@/components/layout/PhoneFrame'
+import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { authApi } from '@/services/auth'
@@ -42,50 +42,37 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <PhoneFrame>
-      <form
-        className="flex flex-1 flex-col px-6 py-8"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <h1 className="text-3xl font-bold">Set a new password</h1>
-        <p className="mt-2 text-sm text-theo-muted">
-          {done
-            ? 'Your password has been updated. You can log in with it once the live session is connected.'
-            : 'Use the token from the reset link.'}
-        </p>
-        {!token ? (
-          <p className="mt-6 text-sm text-red-500">This reset link is missing a token.</p>
-        ) : null}
+    <AuthLayout>
+      <h1 className="mt-5 text-2xl font-bold">Set a new password</h1>
+      <form className="mt-8 w-full space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        {!token ? <p className="text-sm text-red-500">This reset link is missing a token.</p> : null}
         {token && !done ? (
-          <div className="mt-8 space-y-4">
+          <>
             <Input
-              label="New password"
               type="password"
+              placeholder="New password"
               error={form.formState.errors.password?.message}
               {...form.register('password')}
             />
             <Input
-              label="Confirm password"
               type="password"
+              placeholder="Confirm password"
               error={form.formState.errors.confirmPassword?.message}
               {...form.register('confirmPassword')}
             />
-          </div>
+          </>
         ) : null}
-        {serverError ? (
-          <p className="mt-3 text-sm text-red-500">{serverError}</p>
+        {done ? <p className="text-sm text-theo-muted">Password updated. You can log in.</p> : null}
+        {serverError ? <p className="text-sm text-red-500">{serverError}</p> : null}
+        {token && !done ? (
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Update password
+          </Button>
         ) : null}
-        <div className="mt-auto space-y-3">
-          {token && !done ? (
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Saving…' : 'Update password'}
-            </Button>
-          ) : null}
-          <Link to="/login" className="block text-center text-sm text-theo">
-            Back to login
-          </Link>
-        </div>
+        <Link to="/login" className="block text-center text-sm font-medium text-theo">
+          Back to login
+        </Link>
       </form>
-    </PhoneFrame>
+    </AuthLayout>
   )
 }

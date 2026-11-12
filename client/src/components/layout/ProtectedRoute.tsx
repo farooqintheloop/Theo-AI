@@ -1,9 +1,18 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 
-export function ProtectedRoute() {
-  const { user } = useAuth()
+function AuthLoading() {
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-[#f4f2f7] text-sm text-theo-muted">
+      Checking session…
+    </div>
+  )
+}
 
+export function ProtectedRoute() {
+  const { user, loading } = useAuth()
+
+  if (loading) return <AuthLoading />
   if (!user) return <Navigate to="/login" replace />
   if (!user.onboardingComplete) return <Navigate to="/onboarding" replace />
 
@@ -11,8 +20,9 @@ export function ProtectedRoute() {
 }
 
 export function GuestRoute() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
+  if (loading) return <AuthLoading />
   if (user?.onboardingComplete) return <Navigate to="/dashboard" replace />
   if (user) return <Navigate to="/onboarding" replace />
 
@@ -20,8 +30,9 @@ export function GuestRoute() {
 }
 
 export function OnboardingRoute() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
+  if (loading) return <AuthLoading />
   if (!user) return <Navigate to="/login" replace />
   if (user.onboardingComplete) return <Navigate to="/dashboard" replace />
 

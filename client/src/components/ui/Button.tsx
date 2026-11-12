@@ -2,7 +2,7 @@ import { cn } from '@/lib/cn'
 import type { ButtonHTMLAttributes } from 'react'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'bar'
 }
 
 export function Button({
@@ -15,11 +15,12 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex h-12 w-full items-center justify-center rounded-full px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60',
-        variant === 'primary' && 'bg-theo text-white hover:bg-theo-dark',
+        'inline-flex h-12 items-center justify-center px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60',
+        variant === 'primary' && 'w-full rounded-full bg-theo text-white hover:bg-theo-dark',
         variant === 'secondary' &&
-          'border border-theo/20 bg-white text-theo hover:bg-theo-soft',
+          'w-full rounded-full border border-theo/20 bg-white text-theo hover:bg-theo-soft',
         variant === 'ghost' && 'text-theo-muted hover:text-theo',
+        variant === 'bar' && 'w-full rounded-xl bg-theo text-white hover:bg-theo-dark',
         className,
       )}
       {...props}
