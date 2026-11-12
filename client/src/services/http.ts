@@ -2,8 +2,10 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean }
 
+const RENDER_API_URL = 'https://theo-api-cm6y.onrender.com/api'
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
+  baseURL: import.meta.env.VITE_API_URL || RENDER_API_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
